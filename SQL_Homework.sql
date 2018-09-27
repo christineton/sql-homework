@@ -59,8 +59,13 @@ UPDATE actor SET first_name = 'GROUCHO' WHERE (`actor_id` = '172');
 SHOW CREATE TABLE address
 
 -- 6a. Use JOIN to display the first and last names, as well as the address, of each staff member. Use the tables staff and address:
+SELECT staff.first_name, staff.last_name, address.address_id, address.address
+FROM staff
+INNER JOIN address ON staff.address_id=address.address_id;
 
 -- 6b. Use JOIN to display the total amount rung up by each staff member in August of 2005. Use tables staff and payment.
+SELECT staff.first_name, staff.last_name
+
 
 -- 6c. List each film and the number of actors who are listed for that film. Use tables film_actor and film. Use inner join.
 
