@@ -59,22 +59,63 @@ UPDATE actor SET first_name = 'GROUCHO' WHERE (`actor_id` = '172');
 SHOW CREATE TABLE address
 
 -- 6a. Use JOIN to display the first and last names, as well as the address, of each staff member. Use the tables staff and address:
-SELECT staff.first_name, staff.last_name, address.address_id, address.address
+SELECT * FROM staff;
+SELECT * FROM address;
+
+SELECT staff.first_name, staff.last_name, address.address "Address"
 FROM staff
-INNER JOIN address ON staff.address_id=address.address_id;
+JOIN address
+USING (address_id);
 
 -- 6b. Use JOIN to display the total amount rung up by each staff member in August of 2005. Use tables staff and payment.
-SELECT staff.first_name, staff.last_name
+SELECT * FROM staff;
+SELECT * FROM payment;
 
+SELECT staff.staff_id "ID", CONCAT(staff.first_name, " ", staff.last_name) "Employee", SUM(payment.amount) "Total Amount Rung Up"
+FROM staff
+JOIN payment
+USING(staff_id)
+WHERE payment.payment_date LIKE "2005-08%"
+GROUP BY staff.staff_id;
 
 -- 6c. List each film and the number of actors who are listed for that film. Use tables film_actor and film. Use inner join.
+SELECT * FROM film;
+SELECT * FROM film_actor;
+
+SELECT film_id, film.title "Film Title", COUNT(film_actor.actor_id) "Number of Actors"
+FROM film 
+JOIN film_actor
+USING (film_id)
+GROUP BY film.film_id
 
 -- 6d. How many copies of the film Hunchback Impossible exist in the inventory system?
+SELECT film.title "Film", COUNT(inventory.inventory_id) "Number of Copies"
+FROM film
+JOIN inventory
+USING (film_id)
+WHERE film.title="Hunchback Impossible"
+GROUP BY film.film_id;
 
 -- 6e. Using the tables payment and customer and the JOIN command, list the total paid by each customer. List the customers alphabetically by last name:
--- ![Total amount paid](Images/total_payment.png)
+SELECT * FROM payment;
+SELECT * FROM customer;
+
+SELECT customer_id, CONCAT(customer.first_name, " ", customer.last_name) "Customer", SUM(payment.amount) "Total Paid by Customer"
+FROM payment
+JOIN customer
+USING(customer_id)
+GROUP BY customer.customer_id
+ORDER BY customer.last_name;
 
 -- 7a. The music of Queen and Kris Kristofferson have seen an unlikely resurgence. As an unintended consequence, films starting with the letters K and Q have also soared in popularity. Use subqueries to display the titles of movies starting with the letters K and Q whose language is English.
+SELECT * FROM film;
+SELECT * FROM language;
+
+SELECT film_id, title FROM film
+WHERE(title LIKE "K%" 
+OR title LIKE "Q%") AND language_id IN(
+SELECT language_id FROM language
+WHERE name="English");
 
 -- 7b. Use subqueries to display all actors who appear in the film Alone Trip.
 
