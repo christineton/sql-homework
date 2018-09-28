@@ -118,21 +118,120 @@ SELECT language_id FROM language
 WHERE name="English");
 
 -- 7b. Use subqueries to display all actors who appear in the film Alone Trip.
+SELECT * FROM film;
+SELECT * FROM film_actor;
+SELECT * FROM actor;
+
+SELECT actor_id, CONCAT(first_name, " ", last_name) "Actor" FROM actor
+WHERE actor_id IN(
+SELECT actor_id FROM film_actor
+WHERE film_id IN(
+SELECT film_id FROM film
+WHERE title = "Alone Trip"
+));
 
 -- 7c. You want to run an email marketing campaign in Canada, for which you will need the names and email addresses of all Canadian customers. Use joins to retrieve this information.
+SELECT * FROM address;
+SELECT * FROM city;
+SELECT * FROM country;
+SELECT * FROM customer;
+
+SELECT c.customer_id, CONCAT(c.first_name, " ", c.last_name) "Customer", email FROM customer c 
+JOIN address USING(address_id)
+JOIN city USING(city_id)
+JOIN country USING(country_id)
+WHERE country="Canada";
 
 -- 7d. Sales have been lagging among young families, and you wish to target all family movies for a promotion. Identify all movies categorized as family films.
+SELECT * FROM film;
+SELECT * FROM category;
+SELECT * FROM film_category;
+
+-- Subqueries method
+SELECT film_id, title FROM film
+WHERE film_id IN(
+SELECT film_id FROM film_category
+WHERE category_id IN(
+SELECT category_id FROM category
+WHERE name="Family"
+));
+
+-- Joins method
+SELECT film_id, title FROM film
+JOIN film_category USING(film_id)
+JOIN category USING(category_id)
+WHERE name="Family";
 
 -- 7e. Display the most frequently rented movies in descending order.
+SELECT * FROM film;
+SELECT * FROM inventory;
+SELECT * FROM rental;
+
+-- Joins method
+SELECT film_id, title, COUNT(film_id) FROM film
+JOIN inventory USING(film_id)
+JOIN rental USING(inventory_id)
+GROUP BY title
+ORDER BY COUNT(film_id) DESC;
+
 
 -- 7f. Write a query to display how much business, in dollars, each store brought in.
+-- Subqueries method
+SELECT staff_id, SUM(amount) FROM payment
+WHERE staff_id IN(
+SELECT staff_id FROM staff
+WHERE store_id IN(
+SELECT store_id FROM store
+))
+GROUP BY staff_id;
+
+-- Joins method
+SELECT staff_id, SUM(amount) FROM payment
+JOIN staff USING(staff_id)
+JOIN store USING(store_id)
+GROUP BY staff_id;
 
 -- 7g. Write a query to display for each store its store ID, city, and country.
+SELECT * FROM store;
+SELECT * FROM address;
+SELECT * FROM city;
+SELECT * FROM country;
+
+SELECT store_id, city, country FROM store
+JOIN address USING(address_id)
+JOIN city USING(city_id)
+JOIN country USING(country_id);
 
 -- 7h. List the top five genres in gross revenue in descending order. (Hint: you may need to use the following tables: category, film_category, inventory, payment, and rental.)
+SELECT * FROM category;
+SELECT * FROM film_category;
+SELECT * FROM inventory;
+SELECT * FROM payment;
+SELECT * FROM rental;
+
+SELECT name, SUM(amount) FROM category
+JOIN film_category USING(category_id)
+JOIN inventory USING(film_id)
+JOIN rental USING(inventory_id)
+JOIN payment USING(rental_id)
+GROUP BY name
+ORDER BY SUM(amount) DESC
+LIMIT 5;
 
 -- 8a. In your new role as an executive, you would like to have an easy way of viewing the Top five genres by gross revenue. Use the solution from the problem above to create a view. If you haven't solved 7h, you can substitute another query to create a view.
+CREATE VIEW top_five_genres AS
+SELECT name, SUM(amount) FROM category
+JOIN film_category USING(category_id)
+JOIN inventory USING(film_id)
+JOIN rental USING(inventory_id)
+JOIN payment USING(rental_id)
+GROUP BY name
+ORDER BY SUM(amount) DESC
+LIMIT 5;
 
 -- 8b. How would you display the view that you created in 8a?
+SELECT * FROM top_five_genres;
 
 -- 8c. You find that you no longer need the view top_five_genres. Write a query to delete it.
+DROP VIEW top_five_genres;
+SELECT * FROM top_five_genres;
